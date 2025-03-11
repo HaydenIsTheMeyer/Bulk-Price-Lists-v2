@@ -1,0 +1,19 @@
+﻿@model List<Bulk_Price_Lists_v2.Models.Customer>
+
+@foreach (var customer in Model)
+{
+    <tr>
+        <td>
+            <input type="checkbox" class="customerCheckbox" value="@customer.Name" />
+        </td>
+        <td>@customer.Name</td>
+        <td>@customer.GlGroup</td>
+        <td>@customer.PriceList</td>
+    </tr>
+}
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="2">No customers found.</td>
+    </tr>
+}

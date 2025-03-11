@@ -1,0 +1,350 @@
+﻿@model Bulk_Price_Lists_v2.Models.Display
+
+@{
+    ViewData["Title"] = "Price List Management";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center text-primary">Price List Management</h2>
+
+    <div class="row mb-4">
+        <!-- Select Customer Group Dropdown with Checkboxes -->
+        <div class="col-md-4">
+            <label for="customerGroup" class="form-label">Select Customer Group</label>
+            <div class="custom-multiselect">
+                <div class="multiselect-header" id="customerGroupToggle">
+                    <span class="selected-text">-- Select Customer Group(s) --</span>
+                    <span class="caret">▼</span>
+                </div>
+                <ul class="multiselect-dropdown" id="customerGroupDropdown" style="display: none;">
+                    @foreach (var group in Model.CustomerGroups)
+                    {
+                        <li>
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="customerGroupCheckbox" value="@group.Value" data-text="@group.Text" />
+                                @group.Text
+                            </label>
+                        </li>
+                    }
+                </ul>
+                <select id="customerGroup" name="customerGroup" multiple="multiple" class="form-select d-none">
+                    @foreach (var group in Model.CustomerGroups)
+                    {
+                        <option value="@group.Value">@group.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- Select Price List Dropdown -->
+        <div class="col-md-4">
+            <label for="priceList" class="form-label">Select Price List</label>
+            <select id="priceList" class="form-select">
+                <option value="">-- Select a Price List --</option>
+                @foreach (var priceList in Model.PriceLists)
+                {
+                    <option value="@priceList.Value">@priceList.Text</option>
+                }
+            </select>
+        </div>
+
+        <!-- Set Price Lists Button -->
+        <div class="col-md-4 d-flex align-items-end">
+            <button id="setPriceListsBtn" class="btn btn-primary w-100">Set Price Lists</button>
+        </div>
+    </div>
+
+    <!-- Customer Grid -->
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-muted">Customers</h4>
+            <table class="table table-bordered table-hover table-striped">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col" style="width: 50px;">
+                            <input type="checkbox" id="selectAll" title="Select All" />
+                        </th>
+                        <th scope="col">Customer Name</th>
+                        <th scope="col">Group</th>
+                        <th scope="col">Price List</th>
+                    </tr>
+                </thead>
+                <tbody id="customerGrid">
+                    @if (Model.Customers != null && Model.Customers.Any())
+                    {
+                        foreach (var customer in Model.Customers)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="customerCheckbox" value="@customer.Name" />
+                                </td>
+                                <td>@customer.Name</td>
+                                <td>@customer.GlGroup</td>
+                                <td>@customer.PriceList</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">No customers found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fb;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2, h4 {
+            color: #2c3e50;
+        }
+
+        .form-select, .form-label {
+            font-size: 1rem;
+        }
+
+        .btn {
+            font-size: 1rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background-color: #2980b9;
+            }
+
+        .table {
+            background-color: #fff;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+
+            .table th, .table td {
+                padding: 12px;
+                text-align: left;
+            }
+
+        .thead-light {
+            background-color: #f1f3f5;
+        }
+
+        input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+            accent-color: #3498db;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .text-muted {
+            color: #aaa;
+        }
+
+        .text-primary {
+            color: #3498db;
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .custom-multiselect {
+            position: relative;
+            width: 100%;
+        }
+
+        .multiselect-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            color: #495057;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+            .multiselect-header:hover {
+                border-color: #3498db;
+            }
+
+            .multiselect-header .caret {
+                font-size: 12px;
+                color: #6c757d;
+            }
+
+        .multiselect-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            list-style: none;
+            padding: 5px 0;
+            margin: 0;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+            .multiselect-dropdown li {
+                padding: 5px 12px;
+            }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #495057;
+        }
+
+            .checkbox-label input[type="checkbox"] {
+                margin-right: 8px;
+            }
+
+            .checkbox-label:hover {
+                background-color: #f1f3f5;
+            }
+
+        .d-none {
+            display: none;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Toggle dropdown visibility
+            $("#customerGroupToggle").click(function (e) {
+                e.stopPropagation();
+                $("#customerGroupDropdown").toggle();
+            });
+
+            // Close dropdown when clicking outside
+            $(document).click(function (e) {
+                if (!$(e.target).closest(".custom-multiselect").length) {
+                    $("#customerGroupDropdown").hide();
+                }
+            });
+
+            // Update hidden select and header text on checkbox change
+            $(".customerGroupCheckbox").change(function () {
+                var selectedItems = $(".customerGroupCheckbox:checked").map(function () {
+                    return $(this).data("text");
+                }).get();
+
+                var selectedValues = $(".customerGroupCheckbox:checked").map(function () {
+                    return $(this).val();
+                }).get();
+
+                var headerText = selectedItems.length > 0
+                    ? selectedItems.join(", ")
+                    : "-- Select Customer Group(s) --";
+                $("#customerGroupToggle .selected-text").text(headerText);
+
+                $("#customerGroup option").each(function () {
+                    $(this).prop("selected", selectedValues.includes($(this).val()));
+                });
+
+                $("#customerGroup").trigger("change");
+            });
+
+            // Handle change event for Customer Group dropdown
+            $("#customerGroup").change(function () {
+                var selectedGroups = $(this).val() || [];
+
+                if (selectedGroups.length > 0) {
+                    $.ajax({
+                        url: '@Url.Action("GetFilteredCustomers", "Home")',
+                        type: 'GET',
+                        data: { group: selectedGroups },
+                        traditional: true,
+                        success: function (result) {
+                            $("#customerGrid").html(result);
+                        },
+                        error: function () {
+                            alert("An error occurred while fetching customers.");
+                        }
+                    });
+                } else {
+                    $("#customerGrid").html("<tr><td colspan='2' class='text-center text-muted'>No customers found.</td></tr>");
+                }
+            });
+
+            // Handle Set Price Lists button
+            $("#setPriceListsBtn").click(function (e) {
+                e.preventDefault();
+
+                var customerGroups = $("#customerGroup").val() || [];
+                var priceList = $("#priceList").val();
+                var selectedCustomers = $(".customerCheckbox:checked").map(function () {
+                    return $(this).val();
+                }).get();
+
+                if (customerGroups.length > 0 && priceList && selectedCustomers.length > 0) {
+                    $.ajax({
+                        url: '@Url.Action("SetPriceLists", "Home")',
+                        type: 'POST',
+                        data: { customerGroupIds: customerGroups, priceListId: priceList, selectedCustomers: selectedCustomers },
+                        traditional: true,
+                        success: function (result) {
+                            // Redirect to the new page (handled by controller)
+                            window.location.href = '@Url.Action("UpdateResult", "Home")';
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Set Price Lists Error:", status, error);
+                            alert("An error occurred while setting the price lists.");
+                        }
+                    });
+                } else {
+                    alert("Please select customer groups, a price list, and at least one customer.");
+                }
+            });
+
+            // Handle Select All checkbox
+            $("#selectAll").click(function () {
+                var isChecked = $(this).prop("checked");
+                $(".customerCheckbox").prop("checked", isChecked);
+            });
+
+            // Ensure Select All reflects partial selections
+            $(document).on("change", ".customerCheckbox", function () {
+                var allChecked = $(".customerCheckbox").length === $(".customerCheckbox:checked").length;
+                $("#selectAll").prop("checked", allChecked);
+            });
+        });
+    </script>
+}
