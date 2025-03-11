@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: Bulk-Price-Lists
+    runtime: dotnet
+    env: docker
+    repo: https://github.com/HaydenIsTheMeyer/Bulk-Price-Lists-v2
+    branch: master
+    plan: free
+    buildCommand: "dotnet restore && dotnet publish -c Release -o out"
+    startCommand: "dotnet out/YourProjectName.dll"
+    region: oregon
