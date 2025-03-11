@@ -2,13 +2,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /app
 
-# Copy project files & restore dependencies
+# Copy the solution and restore dependencies
 COPY *.sln ./
-COPY Bulk-Price-Lists-v2/*.csproj ./Bulk-Price-Lists-v2/
+COPY Bulk-Price-Lists-v2/Bulk-Price-Lists-v2.csproj ./Bulk-Price-Lists-v2/
 RUN dotnet restore
 
-# Copy everything & build the app
+# Copy the rest of the application files
 COPY . ./
+
+# Build and publish the app
 RUN dotnet publish -c Release -o /out
 
 # Use the official .NET runtime image to run the app
