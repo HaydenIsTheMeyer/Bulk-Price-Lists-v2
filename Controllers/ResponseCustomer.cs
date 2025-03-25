@@ -110,7 +110,7 @@ namespace Bulk_Price_Lists_v2.Controllers
             public int RecordNo { get; set; }
 
             [XmlElement("CUSTOMERID")]
-            public int CustomerId { get; set; }
+            public string CustomerId { get; set; }
 
             [XmlElement("NAME")]
             public string Name { get; set; }

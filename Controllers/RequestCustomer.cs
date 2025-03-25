@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Serialization;
+using System;
+using System.IO;
+using System.Xml;
 
 namespace Bulk_Price_Lists_v2.Controllers
 {
-    public class RequestPriceList
+    public class RequestCustomer
     {
+
+
         [XmlRoot("request")]
         public class Request
         {
@@ -86,18 +90,17 @@ namespace Bulk_Price_Lists_v2.Controllers
             public string[] Fields { get; set; }
         }
 
-        public class Pricelists
+       public  class Customers
         {
-          public static async Task  GetPriceLists()
+            public static async Task GetCustomers()
             {
-                // Create an instance of Request
                 var request = new Request
                 {
                     Control = new Control
                     {
                         SenderId = "agroserve",
                         Password = "@Agr0s3rv3!@#",
-                        ControlId = "{{$timestamp}}", // You will need to replace this with actual timestamp value
+                        ControlId = DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
                         UniqueId = false,
                         DtdVersion = "3.0",
                         IncludeWhitespace = false
@@ -106,19 +109,19 @@ namespace Bulk_Price_Lists_v2.Controllers
                     {
                         Authentication = new Authentication
                         {
-                            SessionId = "u-8_wu9GCxvGUc3kVp0lpK6mG8eVLLv-ExQK8cVRxlHN5FadJYLr41fG"
+                            SessionId = HomeController.SessionId,
                         },
                         Content = new Content
                         {
                             Function = new Function
                             {
-                                ControlId = "{{$guid}}", // Replace with actual GUID
+                                ControlId = Guid.NewGuid().ToString(),
                                 Query = new Query
                                 {
-                                    Object = "SOPRICELIST",
+                                    Object = "CUSTOMER",
                                     Select = new Select
                                     {
-                                        Fields = new string[] { "RECORDNO", "NAME" }
+                                        Fields = new[] { "RECORDNO", "CUSTOMERID", "NAME", "GLGROUP", "PRICELIST" }
                                     }
                                 }
                             }
@@ -126,19 +129,18 @@ namespace Bulk_Price_Lists_v2.Controllers
                     }
                 };
 
-
-
                 string xmlRequest = SerializeToXml(request);
                 string apiUrl = "https://api.intacct.com/ia/xml/xmlgw.phtml";
 
                 string response = await SendXmlRequest(apiUrl, xmlRequest);
 
-                ResponsePriceList.PriceLists.SetPriceLists(response);
+              HomeController.customer = ResponseCustomer.XmlHelper.DeserializeFromXml(response);
 
-                // Execute your request here by passing the serialized XML to your service
-                // (For example, using HttpClient to send it to an API endpoint)
+                Console.WriteLine("API Response:");
+                Console.WriteLine(response);
             }
-           public static string SerializeToXml(Request request)
+
+            static string SerializeToXml(Request request)
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(Request));
                 XmlSerializerNamespaces namespaces = new XmlSerializerNamespaces();
@@ -167,7 +169,7 @@ namespace Bulk_Price_Lists_v2.Controllers
 
 
 
-           public static async Task<string> SendXmlRequest(string url, string xmlData)
+            static async Task<string> SendXmlRequest(string url, string xmlData)
             {
                 using (HttpClient client = new HttpClient())
                 {
@@ -177,5 +179,8 @@ namespace Bulk_Price_Lists_v2.Controllers
                 }
             }
         }
+
+
+
     }
 }

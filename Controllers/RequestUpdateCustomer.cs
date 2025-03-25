@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using System;
-using System.IO;
 using System.Xml;
+using System.Xml.Serialization;
 
 namespace Bulk_Price_Lists_v2.Controllers
 {
-    public class RequestCustomer
+    public class RequestUpdateCustomer
     {
-
 
         [XmlRoot("request")]
         public class Request
@@ -71,36 +68,30 @@ namespace Bulk_Price_Lists_v2.Controllers
             [XmlAttribute("controlid")]
             public string ControlId { get; set; }
 
-            [XmlElement("query")]
-            public Query Query { get; set; }
+            [XmlElement("update")]
+            public Update Update { get; set; }
         }
 
-        public class Query
+        public class Update
         {
-            [XmlElement("object")]
-            public string Object { get; set; }
-
-            [XmlElement("select")]
-            public Select Select { get; set; }
+            [XmlElement("CUSTOMER")]
+            public ResponseCustomer.Customer[] Customers { get; set; }
         }
 
-        public class Select
-        {
-            [XmlElement("field")]
-            public string[] Fields { get; set; }
-        }
 
-       public  class Customers
+
+        public class UpdateCustomer
         {
-            public static async Task GetCustomers()
+            public static async Task UpdateCustomers(ResponseCustomer.Customer[] customers)
             {
+                // Example of creating the request object
                 var request = new Request
                 {
                     Control = new Control
                     {
                         SenderId = "agroserve",
                         Password = "@Agr0s3rv3!@#",
-                        ControlId = DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
+                        ControlId = "{{$timestamp}}",
                         UniqueId = false,
                         DtdVersion = "3.0",
                         IncludeWhitespace = false
@@ -109,38 +100,41 @@ namespace Bulk_Price_Lists_v2.Controllers
                     {
                         Authentication = new Authentication
                         {
-                            SessionId = "u-8_wu9GCxvGUc3kVp0lpK6mG8eVLLv-ExQK8cVRxlHN5FadJYLr41fG"
+                            SessionId = "HcGUmfJt4UXKOf2PMsqz1YVMRcv9HB3BuU8X2i8Pyjn9jzLKs-PACQnK"
                         },
                         Content = new Content
                         {
                             Function = new Function
                             {
-                                ControlId = Guid.NewGuid().ToString(),
-                                Query = new Query
+                                ControlId = "{{$guid}}",
+                                Update = new Update
                                 {
-                                    Object = "CUSTOMER",
-                                    Select = new Select
-                                    {
-                                        Fields = new[] { "RECORDNO", "CUSTOMERID", "NAME", "GLGROUP", "PRICELIST" }
-                                    }
+                                    Customers = customers
+                                
                                 }
                             }
                         }
                     }
                 };
 
+                // Serialize the request object to XML
+                //var serializer = new XmlSerializer(typeof(Request));
+                //using (var stringWriter = new StringWriter())
+                //{
+                //    serializer.Serialize(stringWriter, request);
+                //    string xmlRequest = stringWriter.ToString();
+                //    Console.WriteLine(xmlRequest);
+
+                //    // Here you would send the XML request to your API or service
+                //    // e.g., make an HTTP request with the xmlRequest as the body
+                //}
+
                 string xmlRequest = SerializeToXml(request);
                 string apiUrl = "https://api.intacct.com/ia/xml/xmlgw.phtml";
 
                 string response = await SendXmlRequest(apiUrl, xmlRequest);
-
-              HomeController.customer = ResponseCustomer.XmlHelper.DeserializeFromXml(response);
-
-                Console.WriteLine("API Response:");
-                Console.WriteLine(response);
             }
-
-            static string SerializeToXml(Request request)
+            public static string SerializeToXml(Request request)
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(Request));
                 XmlSerializerNamespaces namespaces = new XmlSerializerNamespaces();
@@ -169,7 +163,7 @@ namespace Bulk_Price_Lists_v2.Controllers
 
 
 
-            static async Task<string> SendXmlRequest(string url, string xmlData)
+            public static async Task<string> SendXmlRequest(string url, string xmlData)
             {
                 using (HttpClient client = new HttpClient())
                 {
@@ -179,8 +173,5 @@ namespace Bulk_Price_Lists_v2.Controllers
                 }
             }
         }
-
-
-
     }
 }

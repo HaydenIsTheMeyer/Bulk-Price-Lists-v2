@@ -8,9 +8,8 @@ using System.Xml.Serialization;
 
 namespace Bulk_Price_Lists_v2.Controllers
 {
-    public class RequestUpdateCustomer
+    public class RequestPriceList
     {
-
         [XmlRoot("request")]
         public class Request
         {
@@ -68,30 +67,37 @@ namespace Bulk_Price_Lists_v2.Controllers
             [XmlAttribute("controlid")]
             public string ControlId { get; set; }
 
-            [XmlElement("update")]
-            public Update Update { get; set; }
+            [XmlElement("query")]
+            public Query Query { get; set; }
         }
 
-        public class Update
+        public class Query
         {
-            [XmlElement("CUSTOMER")]
-            public ResponseCustomer.Customer[] Customers { get; set; }
+            [XmlElement("object")]
+            public string Object { get; set; }
+
+            [XmlElement("select")]
+            public Select Select { get; set; }
         }
 
-
-
-        public class UpdateCustomer
+        public class Select
         {
-            public static async Task UpdateCustomers(ResponseCustomer.Customer[] customers)
+            [XmlElement("field")]
+            public string[] Fields { get; set; }
+        }
+
+        public class Pricelists
+        {
+          public static async Task  GetPriceLists()
             {
-                // Example of creating the request object
+                // Create an instance of Request
                 var request = new Request
                 {
                     Control = new Control
                     {
                         SenderId = "agroserve",
                         Password = "@Agr0s3rv3!@#",
-                        ControlId = "{{$timestamp}}",
+                        ControlId = "{{$timestamp}}", // You will need to replace this with actual timestamp value
                         UniqueId = false,
                         DtdVersion = "3.0",
                         IncludeWhitespace = false
@@ -100,41 +106,39 @@ namespace Bulk_Price_Lists_v2.Controllers
                     {
                         Authentication = new Authentication
                         {
-                            SessionId = "u-8_wu9GCxvGUc3kVp0lpK6mG8eVLLv-ExQK8cVRxlHN5FadJYLr41fG"
+                            SessionId = HomeController.SessionId,
                         },
                         Content = new Content
                         {
                             Function = new Function
                             {
-                                ControlId = "{{$guid}}",
-                                Update = new Update
+                                ControlId = "{{$guid}}", // Replace with actual GUID
+                                Query = new Query
                                 {
-                                    Customers = customers
-                                
+                                    Object = "SOPRICELIST",
+                                    Select = new Select
+                                    {
+                                        Fields = new string[] { "RECORDNO", "NAME" }
+                                    }
                                 }
                             }
                         }
                     }
                 };
 
-                // Serialize the request object to XML
-                //var serializer = new XmlSerializer(typeof(Request));
-                //using (var stringWriter = new StringWriter())
-                //{
-                //    serializer.Serialize(stringWriter, request);
-                //    string xmlRequest = stringWriter.ToString();
-                //    Console.WriteLine(xmlRequest);
 
-                //    // Here you would send the XML request to your API or service
-                //    // e.g., make an HTTP request with the xmlRequest as the body
-                //}
 
                 string xmlRequest = SerializeToXml(request);
                 string apiUrl = "https://api.intacct.com/ia/xml/xmlgw.phtml";
 
                 string response = await SendXmlRequest(apiUrl, xmlRequest);
+
+                ResponsePriceList.PriceLists.SetPriceLists(response);
+
+                // Execute your request here by passing the serialized XML to your service
+                // (For example, using HttpClient to send it to an API endpoint)
             }
-            public static string SerializeToXml(Request request)
+           public static string SerializeToXml(Request request)
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(Request));
                 XmlSerializerNamespaces namespaces = new XmlSerializerNamespaces();
@@ -163,7 +167,7 @@ namespace Bulk_Price_Lists_v2.Controllers
 
 
 
-            public static async Task<string> SendXmlRequest(string url, string xmlData)
+           public static async Task<string> SendXmlRequest(string url, string xmlData)
             {
                 using (HttpClient client = new HttpClient())
                 {

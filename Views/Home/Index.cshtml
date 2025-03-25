@@ -8,49 +8,63 @@
     <h2 class="text-center text-primary">Price List Management</h2>
 
     <div class="row mb-4">
+        <!-- Search Box -->
+        <div class="col-md-4 mb-3">
+            <div class="form-group">
+                <label for="customerSearch" class="form-label">Search Customers</label>
+                <input type="text" id="customerSearch" class="form-control" placeholder="Search by name...">
+            </div>
+        </div>
+
         <!-- Select Customer Group Dropdown with Checkboxes -->
-        <div class="col-md-4">
-            <label for="customerGroup" class="form-label">Select Customer Group</label>
-            <div class="custom-multiselect">
-                <div class="multiselect-header" id="customerGroupToggle">
-                    <span class="selected-text">-- Select Customer Group(s) --</span>
-                    <span class="caret">▼</span>
+        <div class="col-md-4 mb-3">
+            <div class="form-group">
+                <label for="customerGroup" class="form-label">Select Customer Group</label>
+                <div class="custom-multiselect">
+                    <div class="multiselect-header" id="customerGroupToggle">
+                        <span class="selected-text">-- Select Customer Group(s) --</span>
+                        <span class="caret">▼</span>
+                    </div>
+                    <ul class="multiselect-dropdown" id="customerGroupDropdown" style="display: none;">
+                        @foreach (var group in Model.CustomerGroups)
+                        {
+                            <li>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="customerGroupCheckbox" value="@group.Value" data-text="@group.Text" />
+                                    @group.Text
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                    <select id="customerGroup" name="customerGroup" multiple="multiple" class="form-select d-none">
+                        @foreach (var group in Model.CustomerGroups)
+                        {
+                            <option value="@group.Value">@group.Text</option>
+                        }
+                    </select>
                 </div>
-                <ul class="multiselect-dropdown" id="customerGroupDropdown" style="display: none;">
-                    @foreach (var group in Model.CustomerGroups)
+            </div>
+        </div>
+
+        <!-- Select Price List Dropdown -->
+        <div class="col-md-4 mb-3">
+            <div class="form-group">
+                <label for="priceList" class="form-label">Select Price List</label>
+                <select id="priceList" class="form-select">
+                    <option value="">-- Select a Price List --</option>
+                    @foreach (var priceList in Model.PriceLists)
                     {
-                        <li>
-                            <label class="checkbox-label">
-                                <input type="checkbox" class="customerGroupCheckbox" value="@group.Value" data-text="@group.Text" />
-                                @group.Text
-                            </label>
-                        </li>
-                    }
-                </ul>
-                <select id="customerGroup" name="customerGroup" multiple="multiple" class="form-select d-none">
-                    @foreach (var group in Model.CustomerGroups)
-                    {
-                        <option value="@group.Value">@group.Text</option>
+                        <option value="@priceList.Value">@priceList.Text</option>
                     }
                 </select>
             </div>
         </div>
 
-        <!-- Select Price List Dropdown -->
-        <div class="col-md-4">
-            <label for="priceList" class="form-label">Select Price List</label>
-            <select id="priceList" class="form-select">
-                <option value="">-- Select a Price List --</option>
-                @foreach (var priceList in Model.PriceLists)
-                {
-                    <option value="@priceList.Value">@priceList.Text</option>
-                }
-            </select>
-        </div>
-
         <!-- Set Price Lists Button -->
-        <div class="col-md-4 d-flex align-items-end">
-            <button id="setPriceListsBtn" class="btn btn-primary w-100">Set Price Lists</button>
+        <div class="col-md-4 mb-3">
+            <div class="form-group d-flex align-items-end h-100">
+                <button id="setPriceListsBtn" class="btn btn-primary w-100">Set Price Lists</button>
+            </div>
         </div>
     </div>
 
@@ -241,6 +255,20 @@
         .d-none {
             display: none;
         }
+
+        .form-control {
+            font-size: 1rem;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            transition: border-color 0.2s ease;
+        }
+
+            .form-control:focus {
+                border-color: #3498db;
+                outline: none;
+                box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+            }
     </style>
 }
 
@@ -281,6 +309,30 @@
 
                 $("#customerGroup").trigger("change");
             });
+
+                    // Customer search functionality
+        $("#customerSearch").on("input", function() {
+            var searchText = $(this).val().toLowerCase();
+
+            $("#customerGrid tr").each(function() {
+                var customerName = $(this).find("td:eq(1)").text().toLowerCase();
+                var group = $(this).find("td:eq(2)").text().toLowerCase();
+
+                // Show/hide rows based on search text matching name or group
+                if (searchText === "" ||
+                    customerName.indexOf(searchText) !== -1 ||
+                    group.indexOf(searchText) !== -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            // Update Select All checkbox state
+            var visibleCheckboxes = $("#customerGrid tr:visible .customerCheckbox");
+            var checkedVisible = visibleCheckboxes.filter(":checked").length;
+            $("#selectAll").prop("checked", visibleCheckboxes.length === checkedVisible && checkedVisible > 0);
+        });
 
             // Handle change event for Customer Group dropdown
             $("#customerGroup").change(function () {
