@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Bulk_Price_Lists_v2</RootNamespace>
+	  <InvarientGlobalization>true</InvarientGlobalization>
   </PropertyGroup>
 
 </Project>
