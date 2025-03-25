@@ -100,7 +100,7 @@ namespace Bulk_Price_Lists_v2.Controllers
                     {
                         Authentication = new Authentication
                         {
-                            SessionId = "HcGUmfJt4UXKOf2PMsqz1YVMRcv9HB3BuU8X2i8Pyjn9jzLKs-PACQnK"
+                            SessionId = HomeController.SessionId
                         },
                         Content = new Content
                         {
