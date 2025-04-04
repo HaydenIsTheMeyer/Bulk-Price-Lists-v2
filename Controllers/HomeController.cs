@@ -15,7 +15,7 @@ namespace Bulk_Price_Lists_v2.Controllers
 
         private readonly ILogger<HomeController> _logger;
 
-        public static string SessionId { get; private set; } = "ydJE75cIwH1J3sAtli66qeBtfUgaIcnSaTlyvw43Sd7ALZYuuoWlKDFJ";
+        public static string SessionId { get; private set; } = "8Z773PLgvVM8TpfIUJRbgggQUz2KdvGe1goXV3MZPE6XyFCUW65NVR88";
 
         public HomeController(ILogger<HomeController> logger)
         {
